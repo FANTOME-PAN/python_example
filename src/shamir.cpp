@@ -29,7 +29,7 @@ shares* shamir::scheme::createShares(std::string secret) {
 	shares* allShares = new shares(n);
 	int len = secret.length();
 	for (int p = 0; p < len; p += 2) {
-		unsigned short c1 = secret[p], c2 = secret[p + 1];
+		unsigned short c1 = (unsigned char)secret[p], c2 = (unsigned char)secret[p + 1];
 		int data = c1 | (c2 << 8);
 		operand* coeff = new operand[k];
 		coeff[0] = data;
@@ -37,12 +37,14 @@ shares* shamir::scheme::createShares(std::string secret) {
 			coeff[i] = distribution(generator);
 		}
 		point temp;
-		operand x, y;
+		operand x, y, xp;
 		for (int i = 0; i < n; i++) {
 			x = (int)(i + 1);
-			y = 0;
-			for (int j = 0; j < k; j++) {
-				y = y + (coeff[j] * power(x, j));
+			y = coeff[0];
+			xp = 1;
+			for (int j = 1; j < k; j++) {
+				xp = xp * x;
+				y = y + (coeff[j] * xp);
 			}
 			temp.x = x;
 			temp.y = y;
